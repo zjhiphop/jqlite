@@ -10,6 +10,16 @@
 
     Ω.fn = Ω.prototype = {
         constructor: Ω,
+        _iterate: function(handler) {
+            var me = this;
+            var len = me.elements.length-1;
+
+            while(len >= 0) {
+                (function(el) {
+                    handler.call(me, el);
+                })(me.elements.item(len--));
+            }
+        },
         _append: function(el, child) {
             if (typeof child === "string") {
                 el.lastElementChild.insertAdjacentHTML('afterend', child);
@@ -20,7 +30,7 @@
         append: function(child) {
             var me = this;
 
-            this.elements.forEach(function(el) {
+            this._iterate(function(el) {
                 me._append(el, child);
             });
 
@@ -36,7 +46,7 @@
             return this;
         },
         hasClass: function(el, className) {
-
+            el.classList.contains(className);
         },
         _attr: function(el, config) {
             Object.keys(config).forEach(function(key) {
@@ -53,7 +63,7 @@
                 config[key] = value;
             }
 
-            this.elements.forEach(function(el) {
+            me._iterate(function(el) {
                 me._attr(el, config);
             });
 
@@ -63,7 +73,7 @@
             return Ω.fn.init(selector, ctx);
         },
         prop: function(name, value) {
-            this.elements.forEach(function(el) {
+            this._iterate(function(el) {
                 el[name] = value;
             });
 
@@ -80,8 +90,8 @@
             return this;
         },
         on: function(evtType, handler) {
-            this.elements.forEach(function(el) {
-                el.addEventlistener(evtType, handler);
+            this._iterate(function(el) {
+                el.addEventListener(evtType, handler);
             });
 
             return this;
